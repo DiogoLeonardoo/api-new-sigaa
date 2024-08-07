@@ -28,6 +28,7 @@ public class AlunoService {
 
         return alunoModel.toDTO();
     }
+    
 
     @Transactional(readOnly = true)
     public List<AlunoDto> ObterTodos() {
@@ -41,7 +42,12 @@ public class AlunoService {
      @Transactional
     public AlunoDto salvar (AlunoModel novoAluno){
         try {
+            if(alunoRepository.existsByMatricula(novoAluno.getMatricula()) || alunoRepository.existsByCpf(novoAluno.getCpf()))
+                   {
+                throw new DataIntegrityException("Já existe um aluno cadastrado com o CPF ou matríula fornecida.");
+            }
             return alunoRepository.save(novoAluno).toDTO();
+
         }catch (DataIntegrityException e){
             throw new DataIntegrityException("Erro ao criar um novo aluno.");
         }
@@ -50,16 +56,40 @@ public class AlunoService {
     @Transactional
     public AlunoDto atualizar (AlunoModel alunoExistente){
         try {
+            if (!alunoRepository.existsById(alunoExistente.getId())){
+                throw new ObjectNotFoundException("Aluno não encontrado com o ID: " + alunoExistente.getId());
+            }
             return alunoRepository.save(alunoExistente).toDTO();
-        }catch (DataIntegrityException e){
+
+        } catch (DataIntegrityException e){
             throw new DataIntegrityException("Erro ao atualizar um aluno.");
         }
     }
 
+        //Delete somente com o ID
+
     @Transactional
-    public void deletar(AlunoModel aluno){
+    public void deletar(int id){
         try {
-            alunoRepository.delete(aluno);
+            if (!alunoRepository.existsById(id)){
+                throw new ObjectNotFoundException("Aluno não encontrado com o ID: " + id);
+            }
+            alunoRepository.deleteById(id);
+
+        }catch (DataIntegrityException e){
+            throw new DataIntegrityException("Erro ao deletar um aluno.");
+        }
+    }
+
+    //Delete com a matrícula
+    @Transactional
+    public void deleteByMatricula(String matricula){
+        try {
+            if (!alunoRepository.existsByMatricula(matricula)){
+                throw new ObjectNotFoundException("Aluno não encontrado com a matrícula: " + matricula);
+            }
+            alunoRepository.deleteByMatricula(matricula);
+
         }catch (DataIntegrityException e){
             throw new DataIntegrityException("Erro ao deletar um aluno.");
         }

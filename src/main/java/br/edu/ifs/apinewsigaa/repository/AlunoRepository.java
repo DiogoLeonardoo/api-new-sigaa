@@ -20,6 +20,8 @@ public interface AlunoRepository extends JpaRepository<AlunoModel, Integer> {
 
     Boolean existsByCpf(String cpf);
 
+    Boolean existsByEmail(String email);
+
     List<AlunoModel> findByNomeContaining(String nome);
 
     List<AlunoModel> findByOrderByNomeDesc();
